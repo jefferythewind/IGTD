@@ -510,9 +510,9 @@ def generate_image_data(data, index, num_row, num_column, coord, image_folder=No
 
     data_2 = data.copy()
     data_2 = data_2[:, index]
-    max_v = np.max(data_2)
-    min_v = np.min(data_2)
-    data_2 = 255 - (data_2 - min_v) / (max_v - min_v) * 255 # So that black means high value
+#     max_v = np.max(data_2)
+#     min_v = np.min(data_2)
+#     data_2 = 255 - (data_2 - min_v) / (max_v - min_v) * 255 # So that black means high value
 
     image_data = np.empty((num_row, num_column, data_2.shape[0]))
     image_data.fill(np.nan)
@@ -521,16 +521,18 @@ def generate_image_data(data, index, num_row, num_column, coord, image_folder=No
         data_i.fill(np.nan)
         data_i[coord] = data_2[i, :]
         image_data[:, :, i] = data_i
-        if image_folder is not None:
-            fig = plt.figure()
-            plt.imshow(data_i, cmap='gray', vmin=0, vmax=255)
-            plt.axis('scaled')
-            plt.savefig(fname=image_folder + '/' + file_name + '_' + samples[i] + '_image.png', bbox_inches='tight',
-                        pad_inches=0)
-            plt.close(fig)
+#         if image_folder is not None:
+#             np.save(image_folder + '/' + file_name + '_' + samples[i] + '_data', data_i)
+            
+#             fig = plt.figure()
+#             plt.imshow(data_i, cmap='gray', vmin=0, vmax=255)
+#             plt.axis('scaled')
+#             plt.savefig(fname=image_folder + '/' + file_name + '_' + samples[i] + '_image.png', bbox_inches='tight',
+#                         pad_inches=0)
+#             plt.close(fig)
 
-            pd.DataFrame(image_data[:, :, i], index=None, columns=None).to_csv(image_folder + '/' + file_name + '_'
-                + samples[i] + '_data.txt', header=None, index=None, sep='\t', line_terminator='\r\n')
+#             pd.DataFrame(image_data[:, :, i], index=None, columns=None).to_csv(image_folder + '/' + file_name + '_'
+#                 + samples[i] + '_data.txt', header=None, index=None, sep='\t', line_terminator='\r\n')
 
     return image_data, samples
 
@@ -590,53 +592,56 @@ def table_to_image(norm_d, scale, fea_dist_method, image_dist_method, save_image
     os.mkdir(normDir)
 
     ranking_feature, corr = generate_feature_distance_ranking(data=norm_d, method=fea_dist_method)
-    fig = plt.figure(figsize=(save_image_size, save_image_size))
-    plt.imshow(np.max(ranking_feature) - ranking_feature, cmap='gray', interpolation='nearest')
-    plt.savefig(fname=normDir + '/original_feature_ranking.png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
+#     fig = plt.figure(figsize=(save_image_size, save_image_size))
+#     plt.imshow(np.max(ranking_feature) - ranking_feature, cmap='gray', interpolation='nearest')
+#     plt.savefig(fname=normDir + '/original_feature_ranking.png', bbox_inches='tight', pad_inches=0)
+#     plt.close(fig)
 
     coordinate, ranking_image = generate_matrix_distance_ranking(num_r=scale[0], num_c=scale[1],
                                                                  method=image_dist_method)
-    fig = plt.figure(figsize=(save_image_size, save_image_size))
-    plt.imshow(np.max(ranking_image) - ranking_image, cmap='gray', interpolation='nearest')
-    plt.savefig(fname=normDir + '/image_ranking.png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
+#     fig = plt.figure(figsize=(save_image_size, save_image_size))
+#     plt.imshow(np.max(ranking_image) - ranking_image, cmap='gray', interpolation='nearest')
+#     plt.savefig(fname=normDir + '/image_ranking.png', bbox_inches='tight', pad_inches=0)
+#     plt.close(fig)
 
     index, err, time = IGTD(source=ranking_feature, target=ranking_image,
         err_measure=error, max_step=max_step, switch_t=switch_t, val_step=val_step, min_gain=min_gain, random_state=1,
         save_folder=normDir + '/' + error, file_name='')
 
-    fig = plt.figure()
-    plt.plot(time, err)
-    plt.savefig(fname=normDir + '/error_and_runtime.png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
-    fig = plt.figure()
-    plt.plot(range(len(err)), err)
-    plt.savefig(fname=normDir + '/error_and_iteration.png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
+#     fig = plt.figure()
+#     plt.plot(time, err)
+#     plt.savefig(fname=normDir + '/error_and_runtime.png', bbox_inches='tight', pad_inches=0)
+#     plt.close(fig)
+#     fig = plt.figure()
+#     plt.plot(range(len(err)), err)
+#     plt.savefig(fname=normDir + '/error_and_iteration.png', bbox_inches='tight', pad_inches=0)
+#     plt.close(fig)
     min_id = np.argmin(err)
     ranking_feature_random = ranking_feature[index[min_id, :], :]
     ranking_feature_random = ranking_feature_random[:, index[min_id, :]]
 
-    fig = plt.figure(figsize=(save_image_size, save_image_size))
-    plt.imshow(np.max(ranking_feature_random) - ranking_feature_random, cmap='gray',
-               interpolation='nearest')
-    plt.savefig(fname=normDir + '/optimized_feature_ranking.png', bbox_inches='tight', pad_inches=0)
-    plt.close(fig)
+#     fig = plt.figure(figsize=(save_image_size, save_image_size))
+#     plt.imshow(np.max(ranking_feature_random) - ranking_feature_random, cmap='gray',
+#                interpolation='nearest')
+#     plt.savefig(fname=normDir + '/optimized_feature_ranking.png', bbox_inches='tight', pad_inches=0)
+#     plt.close(fig)
 
     data, samples = generate_image_data(data=norm_d, index=index[min_id, :], num_row=scale[0], num_column=scale[1],
         coord=coordinate, image_folder=normDir + '/data', file_name='')
 
-    output = open(normDir + '/Results.pkl', 'wb')
-    cp.dump(norm_d, output)
-    cp.dump(data, output)
-    cp.dump(samples, output)
-    output.close()
+    return data
+    
+    
+#     output = open(normDir + '/Results.pkl', 'wb')
+#     cp.dump(norm_d, output)
+#     cp.dump(data, output)
+#     cp.dump(samples, output)
+#     output.close()
 
-    output = open(normDir + '/Results_Auxiliary.pkl', 'wb')
-    cp.dump(ranking_feature, output)
-    cp.dump(ranking_image, output)
-    cp.dump(coordinate, output)
-    cp.dump(err, output)
-    cp.dump(time, output)
-    output.close()
+#     output = open(normDir + '/Results_Auxiliary.pkl', 'wb')
+#     cp.dump(ranking_feature, output)
+#     cp.dump(ranking_image, output)
+#     cp.dump(coordinate, output)
+#     cp.dump(err, output)
+#     cp.dump(time, output)
+#     output.close()
